@@ -1,0 +1,77 @@
+---
+# tasks file for terraform_be_infra
+- name: setup terraform backend
+  # This terraform configuration configures the terraform backend to use s3 and dynamodb for state management
+  community.general.terraform:
+    project_path: "{{ terraform_backend_dir }}"
+    state: present
+    force_init: true
+    variables:
+      bucket_name: "{{ bucket_name }}"
+      dynamodb_name: "{{ dynamodb_name }}"
+      infrastructure_dir: "{{ terraform_infrastructure_dir }}"
+  tags: 
+    - provision
+
+- name: create infrastructure
+  # This terraform configuration populates ./group_vars/all.yml with ssh key, ansible user, and project name
+  # allows use of ansible without terraform moving forward
+  community.general.terraform:
+    project_path: "{{ terraform_infrastructure_dir }}"
+    state: present
+    force_init: true
+    variables:
+      project_name: "{{ project_name }}"
+      aws_region: "{{ aws_region }}"
+      vpc_cidr: "{{ vpc_cidr }}"
+      subnet_cidr: "{{ subnet_cidr }}"
+      default_route: "{{ default_route }}"
+      home_net: "{{ home_net }}"
+      bcit_net: "{{ bcit_net }}"
+      instance_type: "{{ instance_type }}"
+      ec2_instance_user: "{{ ec2_instance_user }}"
+  tags: 
+    - provision
+
+- name: update ansible inventory
+  # Since the infrastructure has just been created, we need to refresh the ansible inventory
+  meta: refresh_inventory
+  run_once: true
+  tags: 
+    - provision
+
+# see https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#special-tags
+- name: cleanup infrastructure
+  community.general.terraform:
+    project_path: "{{ terraform_infrastructure_dir }}"
+    state: absent
+    force_init: true
+    variables:
+      project_name: "{{ project_name }}"
+      aws_region: "{{ aws_region }}"
+      vpc_cidr: "{{ vpc_cidr }}"
+      subnet_cidr: "{{ subnet_cidr }}"
+      default_route: "{{ default_route }}"
+      home_net: "{{ home_net }}"
+      bcit_net: "{{ bcit_net }}"
+      instance_type: "{{ instance_type }}"
+      ec2_instance_user: "{{ ec2_instance_user }}"
+  tags:
+    - never
+    - cleanup
+
+- name: cleanup terraform backend
+  community.general.terraform:
+    project_path: "{{ terraform_backend_dir }}"
+    state: absent
+    force_init: true
+    variables:
+      bucket_name: "{{ bucket_name }}"
+      dynamodb_name: "{{ dynamodb_name }}"
+      infrastructure_dir: "{{ terraform_infrastructure_dir }}"
+  tags:
+    - never
+    - cleanup
+
+
+# TODO: update tfvars files to match invocation variables

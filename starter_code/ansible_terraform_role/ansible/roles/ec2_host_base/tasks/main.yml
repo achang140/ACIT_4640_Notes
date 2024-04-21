@@ -1,0 +1,40 @@
+---
+# tasks file for ec2_host_base
+- name: echo variables
+  ansible.builtin.debug:
+    msg: 
+      project group: "{{ project_group }}" 
+      groups in inventory: "{{ groups }}"
+      hosts in "{{ project_group }}": "{{ groups[project_group]}}"
+  tags:
+    - never
+    - debug
+
+- name: set hostname to inventory name
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+
+- name: setup hosts file with inventory names
+  ansible.builtin.template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+    group: root
+    owner: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: install debugging tools and core packages
+  ansible.builtin.package:
+    update_cache: true
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - bind9-dnsutils
+    - tcpdump
+    - nmap
+    - netcat-openbsd
+    - acl
+  become: true
+
+

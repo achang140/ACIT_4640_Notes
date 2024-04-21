@@ -1,0 +1,16 @@
+# used by the ansible playbook to configure the terraform 
+# they are assigned to the localhost as this is the host that "runs" terraform
+aws_region:  "us-west-2"
+project_name: "ansible_terraform_role"
+project_group : "project_ansible_terraform_role"
+vpc_cidr: "172.16.0.0/16"
+subnet_cidr: "172.16.1.0/24"
+default_route: "0.0.0.0/0"
+home_net: "75.157.0.0/16"
+bcit_net: "142.232.0.0/16"
+instance_type: "t2.micro"
+ec2_instance_user: "ubuntu"
+bucket_name: "bcit-tholane-acit-4640-ansible-terraform-role-state"
+dynamodb_name: "bcit-tholane-acit-4640-ansible-terraform-role-state-lock"
+terraform_infrastructure_dir: "{{ playbook_dir }}/../terraform/infrastructure"
+terraform_backend_dir: "{{ playbook_dir }}/../terraform/backend"

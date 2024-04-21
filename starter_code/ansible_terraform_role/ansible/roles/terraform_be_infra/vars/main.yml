@@ -1,0 +1,6 @@
+---
+# vars file for terraform_be_infra
+# Matches dynamic inventory plugin configuration where the tag Project is used to create groups
+# prefixed with "project_".
+# Ony updates hosts in the project group
+project_group: "project_{{ project_name }}"

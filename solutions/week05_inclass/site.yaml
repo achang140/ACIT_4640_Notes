@@ -1,0 +1,48 @@
+- name: install and enable nginx 
+  hosts: web
+  tasks:
+    - name: install nginx package
+      ansible.builtin.package:
+        name: nginx
+        state: latest
+        update_cache: true
+      become: true
+    - name: copy example HTML document to /var/www/html
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        mode: u=rw,g=r,o=r
+      become: true
+    - name: start and enable nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      become: true
+ 
+
+- name: install mysql-server
+  hosts: db
+  tasks:
+    - name: install mysql-server package
+      ansible.builtin.package:
+        name: mysql-server
+        state: latest
+        update_cache: true
+      become: true
+
+- name: install bun
+  hosts: backend
+  tasks:
+    - name: install unzip package
+      ansible.builtin.package:
+        name: unzip 
+        state: latest
+        update_cache: true
+      become: true
+    - name: install bun
+      ansible.builtin.shell: |
+        curl -fsSL https://bun.sh/install | bash
+      args:
+        executable: /bin/bash
